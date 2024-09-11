@@ -1,0 +1,98 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+
+.Image-container {
+  margin-right: 50px;
+}
+
+.login-card {
+  background-color: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 250px;
+  width: 100%;
+}
+
+
+.login-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+
+.form-controller {
+  margin-bottom: 20px;
+}
+
+
+.form-controller label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+  margin-right: 130px;
+}
+
+
+input {
+  width: 80%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+
+.datasubmit {
+  width: 50%;
+  background-color: #fbd33c;
+  color: #050404;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: center;
+}
+
+.submit:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+
+.para {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.para p {
+  font-size: 14px;
+  color: #333;
+}
+
+
+.para a {
+  color: #007BFF;
+  text-decoration: none;
+}
+
+.para a:hover {
+  text-decoration: underline;
+}
