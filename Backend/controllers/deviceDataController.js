@@ -2,7 +2,7 @@ const DeviceData = require("../models/deviceDataSchema");
 
 module.exports.getInverterData = async(req, res)=> {
     try{
-        const {IMEI_NO} = req.body;
+        const {IMEI_NO} = req.params;
         const data = await DeviceData.find({IMEI_NO});
         if (data.length === 0) {
             return res.status(404).json({
