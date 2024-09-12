@@ -2,11 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const deviceDataSchema = new Schema({
-    dateTime: { 
-        type: Date,
-        default: Date.now,
-    },
-    imeiNo: { 
+    IMEI_NO: { 
         type: String, 
         required: true,
         minlength: 15,
@@ -18,50 +14,50 @@ const deviceDataSchema = new Schema({
             message: props => `${props.value} is not a valid IMEI number!`
         }
     },
-    simNo: { 
+    SIM_NO: { 
         type: String, 
         required: true 
     },
-    dcVoltage: { 
-        type: Number, 
-        required: true 
-    },
-    dcCurrent: { 
-        type: Number, 
-        required: true 
-    },
-    dcPower: { 
-        type: Number, 
-        required: true 
-    },
-    acVoltage: { 
-        type: Number, 
-        required: true 
-    },
-    acCurrent: { 
-        type: Number, 
-        required: true 
-    },
-    acPower: { 
-        type: Number, 
-        required: true 
-    },
-    fault: { 
-        type: Number, 
-        required: true 
-    },
-    todayProduction: { 
-        type: Number, 
-        required: true 
-    },
-    totalProduction: { 
-        type: Number, 
-        required: true 
-    },
-    createdOn: { 
-        type: Date, 
+    DATE_TIME: { 
+        type: Date,
         default: Date.now,
-    }
+    },
+    INPUT_VOLTAGE: { 
+        type: String, 
+        required: true 
+    },
+    INPUT_CURRENT: { 
+        type: String, 
+        required: true 
+    },
+    INPUT_POWER: { 
+        type: String, 
+        required: true 
+    },
+    OUTPUT_VOLTAGE: { 
+        type: String, 
+        required: true 
+    },
+    OUTPUT_CURRENT: { 
+        type: String, 
+        required: true 
+    },
+    OUTPUT_POWER: { 
+        type: String, 
+        required: true 
+    },
+    FAULT: { 
+        type: String, 
+        required: true 
+    },
+    TODAY_ENERGY: { 
+        type: String, 
+        required: true 
+    },
+    TOTAL_ENERGY: { 
+        type: String, 
+        required: true 
+    },
 });
 
 const DeviceData = mongoose.model("DeviceData", deviceDataSchema);

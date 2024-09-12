@@ -1,7 +1,7 @@
-const {showData, addData} = require("../controllers/deviceDataController");
+const {getInverterData, addInverterData} = require("../controllers/deviceDataController");
 const router = require("express").Router();
 
-router.get("/showData", showData);
-router.post("/addData", addData);
+router.get("/getData", getInverterData);
+router.post("/addData", addInverterData);
 
 module.exports = router;
