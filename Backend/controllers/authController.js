@@ -2,9 +2,30 @@ const User = require("../models/userSchema");
 const {createSecretToken} = require("../util/secretToken");
 const bcrypt = require("bcrypt");
 
-module.exports.Signup = async(req, res, next) => {
-    try{
+module.exports.Signup = async(req, res) => {
         const {email, username, password, createdAt} = req.body;
+        console.log(email);
+        if (!email) {
+            return res.status(400).json({ 
+                message: "Email is required", 
+                success: false 
+            });
+        }
+    
+        if (!username) {
+            return res.status(400).json({ 
+                message: "Username is required", 
+                success: false 
+            });
+        }
+    
+        if (!password) {
+            return res.status(400).json({ 
+                message: "Password is required", 
+                success: false 
+            });
+        }
+        try{
         const existingUser = await User.findOne({email});
         if(existingUser){
             return res.json({
@@ -24,7 +45,6 @@ module.exports.Signup = async(req, res, next) => {
             success: true,
             newUser
         });
-        next();
     }catch(error){
         console.error(error);
         res.status(500).json({ 
