@@ -123,7 +123,11 @@ module.exports.addInverterData = async (req, res) => {
 //                 success: false,
 //                 message: "IMEI_NO, startDate, endDate are required"
 //             });
-
 //         }
+
+//         const start = new Date(startDate);
+//         const end = new Date(endDate);
+
+        
 //     }
 // }
