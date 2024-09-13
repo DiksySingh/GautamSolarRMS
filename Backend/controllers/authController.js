@@ -54,19 +54,28 @@ module.exports.Signup = async(req, res) => {
     }
 };
 
-module.exports.Login = async(req, res, next) => {
+module.exports.Login = async(req, res) => {
     try{
         const {email, password} = req.body;
         if(!email || !password){
-            return res.json({message: "All fields are required"});
+            return res.json({
+                message: "All fields are required",
+                success:false
+            });
         }
         const user = await User.findOne({email});
         if(!user){
-            return res.json({message: "Incorrect password or email"});
+            return res.json({
+                message: "Incorrect password or email",
+                success: false
+            });
         }
-        const auth = bcrypt.compare(password, user.password);
+        const auth = await bcrypt.compare(password, user.password);
         if(!auth){
-            return res.json({message: "Incorrect password or email"});
+            return res.json({
+                message: "Incorrect password or email",
+                success:false,
+            });
         }
 
         const token = createSecretToken(user._id);
@@ -78,13 +87,12 @@ module.exports.Login = async(req, res, next) => {
             message: "User logged in successfully",
             success: true
         });
-        next();
     }catch(error){
         console.error(error);
     }
 }
 
-module.exports.Logout = async(req, res, next) => {
-        res.clearCookie('token');
-        res.send('Logged out successfully');
-}
+// module.exports.Logout = async(req, res, next) => {
+//         res.clearCookie('token');
+//         res.send('Logged out successfully');
+// }
