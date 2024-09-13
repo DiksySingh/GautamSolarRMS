@@ -115,19 +115,42 @@ module.exports.addInverterData = async (req, res) => {
     }
 };
 
-// module.exports.fetchDeviceData = async(req, res) => {
-//     const {IMEI_NO, startDate, endDate} = req.body;
-//     try{
-//         if(!IMEI_NO || !startDate || !endDate){
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "IMEI_NO, startDate, endDate are required"
-//             });
-//         }
+module.exports.fetchDeviceData = async(req, res) => {
+    const {IMEI_NO, startDate, endDate} = req.body;
+    if(!IMEI_NO || !startDate || !endDate){
+        return res.status(400).json({
+            success: false,
+            message: "IMEI_NO, startDate, endDate are required"
+        });
+    }
+    try{
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-//         const start = new Date(startDate);
-//         const end = new Date(endDate);
-
-        
-//     }
-// }
+        const fetchData = await DeviceData.find({
+            IMEI_NO: IMEI_NO,
+            DATE_TIME: {
+                $gte: start,
+                $lte: end
+            }
+        });
+        //console.log(fetchData);
+        if(fetchData.length === 0){
+            return res.status(404).json({
+                success: false,
+                message: "Data Not Found",
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Data Fetched Successfully",
+            data: fetchData
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
