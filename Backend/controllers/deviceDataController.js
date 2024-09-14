@@ -116,17 +116,60 @@ module.exports.addInverterData = async (req, res) => {
 };
 
 module.exports.fetchDeviceData = async(req, res) => {
-    const {IMEI_NO, startDate, endDate} = req.body;
-    if(!IMEI_NO || !startDate || !endDate){
+    const {IMEI_NO, filterOption, startDate, endDate} = req.body;
+    if(!IMEI_NO || !filterOption){
         return res.status(400).json({
             success: false,
-            message: "IMEI_NO, startDate, endDate are required"
+            message: "IMEI_NO and filterOption is required"
         });
     }
-    try{
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+    let start, end;
 
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    switch(filterOption){
+        case "today":
+            start = new Date();
+            start.setHours(0, 0, 0, 0);
+            end = today;
+            break;
+        
+        case "1 month":
+            start = new Date();
+            start.setMonth(today.getMonth() - 1);
+            start.setHours(0, 0, 0, 0);
+            end = today;
+            break;
+        
+        case '3 months':
+            start = new Date();
+            start.setMonth(today.getMonth() - 3);
+            start.setHours(0, 0, 0, 0);
+            end = today;
+            break;
+        
+        case 'custom':
+            if(!startDate || !endDate){
+                return res.status(400).json({
+                    success: false,
+                    message: "For custom filter, startDate and endDate are required.",
+                });
+            }
+
+            start = new Date(startDate);
+            end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            break;
+        
+        default:
+            return res.status(400).json({
+                success: false,
+                message: "Invalid filter option.",
+            });
+    }
+
+    try{
         const fetchData = await DeviceData.find({
             IMEI_NO: IMEI_NO,
             DATE_TIME: {
