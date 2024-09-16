@@ -4,7 +4,6 @@ const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
-const DeviceDataModel = require("./models/deviceDataSchema");
 const authRoute = require("./routes/authRoute");
 const deviceDataRoute = require("./routes/deviceDataRoute");
 
@@ -55,5 +54,4 @@ app.use("/", deviceDataRoute);
 
 app.listen(3000, () => {
     console.log("Server running at port 3000");
-    
 });
