@@ -9,17 +9,15 @@ const deviceDataRoute = require("./routes/deviceDataRoute");
 
 const URL = process.env.MONGO_URL;
 
-main()
-  .then(() => {
-    console.log("Connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-async function main(){
+async function main() {
+  try {
     await mongoose.connect(URL);
+    console.log("Connected to DB");
+  } catch (err) {
+    console.error("Error connecting to DB:", err);
+  }
 }
+main();
 
 app.use(cors()); 
 app.use(cookieParser());
