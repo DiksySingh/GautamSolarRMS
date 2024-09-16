@@ -27,8 +27,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //Routes
-app.use("/", authRoute);
-app.use("/", deviceDataRoute);
+app.use("/user", authRoute);
+app.use("/device", deviceDataRoute);
 
 // app.get("/showData", async(req, res)=> {
 //     try{
