@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 
 module.exports.Signup = async(req, res) => {
         const {email, username, password, createdAt} = req.body;
-        console.log(email);
         if (!email) {
             return res.status(400).json({ 
                 message: "Email is required", 
@@ -25,6 +24,7 @@ module.exports.Signup = async(req, res) => {
                 success: false 
             });
         }
+        
         try{
         const existingUser = await User.findOne({email});
         if(existingUser){
@@ -35,11 +35,13 @@ module.exports.Signup = async(req, res) => {
         const newUser = new User({ email, username, password, createdAt});
         console.log(newUser);
         await newUser.save();
+
         const token = createSecretToken(newUser._id);
         res.cookie("token", token, {
             withCredentials: true,
             httpOnly: false,
         });
+
         res.status(201).json({
             message: "User registered successfully",
             success: true,

@@ -1,4 +1,5 @@
 const DeviceData = require("../models/deviceDataSchema");
+const moment = require("moment")
 
 module.exports.getInverterData = async(req, res)=> {
     try{
@@ -197,3 +198,80 @@ module.exports.fetchDeviceData = async(req, res) => {
         });
     }
 };
+
+module.exports.getProductionOverview = async (req, res) => {
+    try {
+        const { imei } = req.params;
+
+        // Fetch the latest data
+        const latestData = await DeviceData.findOne({ IMEI_NO: imei }).sort({ DATE_TIME: -1 }); // Get the latest record
+
+        if (!latestData) {
+            return res.status(404).json({ 
+                error: 'No data found for this device',
+                success: false 
+            });
+        }
+
+        const totalProductionPower = latestData.OUTPUT_POWER;
+        const installedCapacity = latestData.INSTALLED_CAPACITY || 6;  // Assuming a default value
+
+        const dailyProduction = latestData.TODAY_ENERGY;
+        const monthlyProduction = await getMonthlyProduction(imei);
+        const yearlyProduction = await getYearlyProduction(imei);
+        const totalProduction = latestData.TOTAL_ENERGY;
+
+        res.json({
+            totalProductionPower,
+            installedCapacity,
+            dailyProduction,
+            monthlyProduction,
+            yearlyProduction,
+            totalProduction
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            error: err.message,
+            success: false 
+        });
+    }
+};
+
+async function getMonthlyProduction(imei) {
+    try{
+    const startOfMonth = moment().startOf('month').toDate();
+    console.log(startOfMonth);
+    const endOfMonth = moment().endOf('month').toDate();
+    console.log(endOfMonth);
+
+    const monthlyProduction = await DeviceData.aggregate([
+        { $match: { IMEI_NO: imei, DATE_TIME: { $gte: startOfMonth, $lte: endOfMonth } } },
+        { $group: { _id: null, totalEnergy: { $sum: '$TODAY_ENERGY' } } },
+    ]);
+    console.log(monthlyProduction);
+
+    return monthlyProduction.length ? monthlyProduction[0].totalEnergy : 0;
+    }catch (error) {
+        console.error('Error fetching monthly production:', error);
+        throw error;
+    }
+}
+
+async function getYearlyProduction(imei) {
+    try{
+    const startOfYear = moment().startOf('year').toDate();
+    const endOfYear = moment().endOf('year').toDate();
+    console.log(startOfYear," ", endOfYear);
+
+    const yearlyProduction = await DeviceData.aggregate([
+        { $match: { IMEI_NO: imei, DATE_TIME: { $gte: startOfYear, $lte: endOfYear } } },
+        { $group: { _id: null, totalEnergy: { $sum: '$TODAY_ENERGY' } } },
+    ]);
+    console.log(yearlyProduction);
+
+    return yearlyProduction.length ? yearlyProduction[0].totalEnergy : 0;
+    }catch (error) {
+        console.error('Error fetching yearly production:', error);
+        throw error;
+    }
+}

@@ -1,0 +1,10 @@
+const moment = require("moment");
+console.log(moment().toString());
+console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+const startOfMonth = moment().startOf('month').toDate();
+console.log(startOfMonth);
+const endOfMonth = moment().endOf('month').toDate();
+console.log(endOfMonth);
+const startOfYear = moment().startOf('year').toDate();
+const endOfYear = moment().endOf('year').toDate();
+console.log(startOfYear," ",endOfYear);
