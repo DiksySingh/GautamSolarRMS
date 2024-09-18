@@ -18,13 +18,6 @@ module.exports.Signup = async(req, res) => {
             });
         }
     
-        if (!username) {
-            return res.status(400).json({ 
-                message: "Username is required", 
-                success: false 
-            });
-        }
-    
         if (!password) {
             return res.status(400).json({ 
                 message: "Password is required", 
@@ -83,7 +76,7 @@ module.exports.Login = async(req, res) => {
         if(!auth){
             return res.json({
                 message: "Incorrect password or email",
-                success:false,
+                success:false
             });
         }
 
@@ -97,7 +90,9 @@ module.exports.Login = async(req, res) => {
             success: true,
         });
     }catch(error){
-        console.error(error);
+        res.status(500).json({
+            error: error.message
+        });
     }
 }
 
