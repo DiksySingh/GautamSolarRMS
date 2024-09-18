@@ -18,9 +18,9 @@ module.exports.Signup = async(req, res) => {
             });
         }
     
-        if (!password) {
+        if (!password || password.length < 8) {
             return res.status(400).json({ 
-                message: "Password is required", 
+                message: "Password must be atleast 8 characters long", 
                 success: false 
             });
         }
@@ -91,6 +91,7 @@ module.exports.Login = async(req, res) => {
         });
     }catch(error){
         res.status(500).json({
+            success: false,
             error: error.message
         });
     }
