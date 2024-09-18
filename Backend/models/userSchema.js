@@ -17,6 +17,10 @@ const userSchema = new Schema({
         required: [true, "Email address is required"],
         unique: true,
     },
+    plantInstalled: {
+        type: Number,
+        required: true,
+    },
     password: {
         type: String,
         required: [true, "Password is required"],
