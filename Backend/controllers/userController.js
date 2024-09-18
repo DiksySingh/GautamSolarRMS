@@ -3,7 +3,14 @@ const {createSecretToken} = require("../util/secretToken");
 const bcrypt = require("bcrypt");
 
 module.exports.Signup = async(req, res) => {
-        const {email, username, password, createdAt} = req.body;
+        const {name, address, email, password, createdAt} = req.body;
+        if (!name) {
+            return res.status(400).json({ 
+                message: "Name is required", 
+                success: false 
+            });
+        }
+
         if (!email) {
             return res.status(400).json({ 
                 message: "Email is required", 
@@ -32,7 +39,7 @@ module.exports.Signup = async(req, res) => {
                 message: "User already exist"
             });
         }
-        const newUser = new User({ email, username, password, createdAt});
+        const newUser = new User({name, address, email, password, createdAt});
         console.log(newUser);
         await newUser.save();
 

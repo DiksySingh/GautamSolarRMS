@@ -4,14 +4,18 @@ const bcrypt = require("bcrypt");
 //const moment = require("moment-timezone");
 
 const userSchema = new Schema({
+    name: { 
+        type: String,
+        required: [true, "Name is required"],
+    },
+    address: {  
+        type: String, 
+        required: false,
+    },
     email:{
         type: String,
         required: [true, "Email address is required"],
         unique: true,
-    },
-    username: {
-        type: String,
-        required: [true, "Username is required"],
     },
     password: {
         type: String,

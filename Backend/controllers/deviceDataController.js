@@ -205,7 +205,7 @@ module.exports.getProductionOverview = async (req, res) => {
 
         // Fetch the latest data
         const latestData = await DeviceData.findOne({ IMEI_NO: imei }).sort({ DATE_TIME: -1 }); // Get the latest record
-
+        console.log(latestData);
         if (!latestData) {
             return res.status(404).json({ 
                 error: 'No data found for this device',
@@ -217,11 +217,13 @@ module.exports.getProductionOverview = async (req, res) => {
         const installedCapacity = latestData.INSTALLED_CAPACITY || 6;  // Assuming a default value
 
         const dailyProduction = latestData.TODAY_ENERGY;
-        const monthlyProduction = await getMonthlyProduction(imei);
+        const monthlyProduction = await getMonthlyProduction(imei); 
+        console.log(monthlyProduction);
         const yearlyProduction = await getYearlyProduction(imei);
+        console.log(yearlyProduction);
         const totalProduction = latestData.TOTAL_ENERGY;
 
-        res.json({
+        res.status(200).json({
             totalProductionPower,
             installedCapacity,
             dailyProduction,
