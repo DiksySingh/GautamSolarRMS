@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const userSchema = new Schema({
     name: { 
         type: String,
-        required: [true, "Name is required"],
+        required: [true, "Name is required"], 
     },
     address: {  
         type: String, 
@@ -28,7 +28,7 @@ const userSchema = new Schema({
     },
     createdAt:{
         type: Date,
-        default: () => new Date() ,
+        default: () => new Date(),
     }
 });
 

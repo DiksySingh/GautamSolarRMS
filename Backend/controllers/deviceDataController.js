@@ -239,6 +239,7 @@ module.exports.getProductionOverview = async (req, res) => {
     }
 };
 
+//Getting the data monthly productionn according to date anf todays energy field
 async function getMonthlyProduction(imei) {
     try{
     const startOfMonth = moment().startOf('month').toDate();
@@ -248,7 +249,7 @@ async function getMonthlyProduction(imei) {
 
     const monthlyProduction = await DeviceData.aggregate([
         { $match: { IMEI_NO: imei, DATE_TIME: { $gte: startOfMonth, $lte: endOfMonth } } },
-        { $group: { _id: null, totalEnergy: { $sum: '$TODAY_ENERGY' } } },
+        { $group: { _id: null, totalEnergy: { $sum: { $toDouble: '$TODAY_ENERGY'} } } },
     ]);
     console.log(monthlyProduction);
 
@@ -259,6 +260,7 @@ async function getMonthlyProduction(imei) {
     }
 }
 
+//Getting the data yearly productionn according to date anf todays energy field
 async function getYearlyProduction(imei) {
     try{
     const startOfYear = moment().startOf('year').toDate();
@@ -267,7 +269,7 @@ async function getYearlyProduction(imei) {
 
     const yearlyProduction = await DeviceData.aggregate([
         { $match: { IMEI_NO: imei, DATE_TIME: { $gte: startOfYear, $lte: endOfYear } } },
-        { $group: { _id: null, totalEnergy: { $sum: '$TODAY_ENERGY' } } },
+        { $group: { _id: null, totalEnergy: { $sum: { $toDouble: '$TODAY_ENERGY'} } } },
     ]);
     console.log(yearlyProduction);
 
