@@ -4,7 +4,8 @@ const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
-const authRoute = require("./routes/authRoute");
+const adminRoute = require("./routes/adminRoute");
+const userRoute = require("./routes/userRoute");
 const deviceDataRoute = require("./routes/deviceDataRoute");
 
 const URL = process.env.MONGO_URL;
@@ -27,7 +28,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //Routes
-app.use("/user", authRoute);
+app.use("/admin", adminRoute);
+app.use("/user", userRoute);
 app.use("/device", deviceDataRoute);
 
 // app.get("/showData", async(req, res)=> {
