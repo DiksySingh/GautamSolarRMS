@@ -34,12 +34,12 @@ module.exports.adminSignUp = async (req, res) => {
             }
 
             const newAdmin = new Admin({username, email, password, createdAt});
-            await addAdmin.save();
+            await newAdmin.save();
            
             res.status(201).json({
                 success: true,
                 message: "Admin registered successfully",
-                data: result
+                data: newAdmin
             }); 
         }catch(error){
             res.status(500).json({
