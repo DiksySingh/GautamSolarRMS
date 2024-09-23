@@ -199,9 +199,10 @@ module.exports.fetchDeviceData = async(req, res) => {
     }
 };
 
-module.exports.getProductionOverview = async (req, res) => {
+module.exports.getDeviceOverview = async (req, res) => {
     try {
         const { imei } = req.params;
+        const { month, year } = req.query;
 
         // Fetch the latest data
         const latestData = await DeviceData.findOne({ IMEI_NO: imei }).sort({ DATE_TIME: -1 }); // Get the latest record
@@ -223,13 +224,46 @@ module.exports.getProductionOverview = async (req, res) => {
         console.log(yearlyProduction);
         const totalProduction = latestData.TOTAL_ENERGY;
 
+        // Calculate the start and end of the requested month or default to current month/year
+        const selectedMonth = month || moment().format('MM'); // Defaults to current month if not provided
+        const selectedYear = year || moment().format('YYYY'); // Defaults to current year if not provided
+        
+        // Create the start and end dates for the selected month/year
+        const startOfMonth = moment(`${selectedYear}-${selectedMonth}-01`, 'YYYY-MM-DD').startOf('month').toDate();
+        const endOfMonth = moment(`${selectedYear}-${selectedMonth}-01`, 'YYYY-MM-DD').endOf('month').toDate();
+
+        // MongoDB aggregation query to group by day and sum the energy
+        const dailyProductionData = await DeviceData.aggregate([
+            { 
+                $match: { 
+                    IMEI_NO: imei, 
+                    DATE_TIME: { $gte: startOfMonth, $lte: endOfMonth } 
+                } 
+            },
+            {
+                $group: {
+                    _id: { $dayOfMonth: '$DATE_TIME' }, // Group by day of the month
+                    totalEnergy: { $sum: { $toDouble:'$TODAY_ENERGY' }}, // Sum the energy for each day
+                }
+            },
+            { $sort: { _id: 1 } } // Sort by day in ascending order
+        ]);
+
+        // Transform the data for frontend use
+        const productionData = dailyProductionData.map(item => ({
+            day: item._id,
+            totalEnergy: item.totalEnergy
+        }));
+
         res.status(200).json({
+            success: true,
             totalProductionPower,
             installedCapacity,
             dailyProduction,
             monthlyProduction,
             yearlyProduction,
-            totalProduction
+            totalProduction,
+            productionData
         });
     } catch (err) {
         res.status(500).json({ 

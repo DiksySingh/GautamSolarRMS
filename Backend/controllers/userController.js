@@ -35,7 +35,7 @@ module.exports.Signup = async(req, res) => {
         try{
         const existingUser = await User.findOne({email});
         if(existingUser){
-            return res.json({
+            return res.status(401).json({
                 message: "User already exist"
             });
         }
@@ -52,7 +52,7 @@ module.exports.Signup = async(req, res) => {
         res.status(201).json({
             message: "User registered successfully",
             success: true,
-            newUser
+            data: newUser
         });
     }catch(error){
         console.error(error);
@@ -67,23 +67,24 @@ module.exports.Login = async(req, res) => {
     try{
         const {email, password} = req.body;
         if(!email || !password){
-            return res.json({
+            return res.status(400).json({
+                success: false,
                 message: "All fields are required",
-                success:false
             });
         }
         const user = await User.findOne({email});
         if(!user){
-            return res.json({
+            return res.status(401).json({
+                success: false,               
                 message: "Incorrect password or email",
-                success: false
+                
             });
         }
         const auth = await bcrypt.compare(password, user.password);
         if(!auth){
-            return res.json({
-                message: "Incorrect password or email",
-                success:false
+            return res.status(401).json({
+                success: false,
+                message: "Incorrect password or email"
             });
         }
 
@@ -93,12 +94,17 @@ module.exports.Login = async(req, res) => {
             httpOnly: false
         });
         res.status(201).json({
-            message: "User logged in successfully",
             success: true,
+            message: "User logged in successfully",
+            data: {
+                email: email,
+                token
+            }
         });
     }catch(error){
         res.status(500).json({
             success: false,
+            message: "Internal Server Error",
             error: error.message
         });
     }
