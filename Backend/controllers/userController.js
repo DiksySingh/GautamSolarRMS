@@ -1,9 +1,10 @@
 const User = require("../models/userSchema");
+const Admin = require("../models/adminSchema");
 const {createSecretToken} = require("../util/secretToken");
 const bcrypt = require("bcrypt");
 
 module.exports.Signup = async(req, res) => {
-        const {name, address, email, plantInstalled, password, createdAt} = req.body;
+        const {name, address, email, plantInstalled, password, role, createdAt} = req.body;
         if (!name) {
             return res.status(400).json({ 
                 message: "Name is required", 
@@ -39,7 +40,7 @@ module.exports.Signup = async(req, res) => {
                 message: "User already exist"
             });
         }
-        const newUser = new User({name, address, email, plantInstalled, password, createdAt});
+        const newUser = new User({name, address, email, plantInstalled, password, role, createdAt});
         console.log(newUser);
         await newUser.save();
 
@@ -65,14 +66,28 @@ module.exports.Signup = async(req, res) => {
 
 module.exports.Login = async(req, res) => {
     try{
-        const {email, password} = req.body;
-        if(!email || !password){
+        const {email, password, role} = req.body;
+        if(!email || !password || !role){
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
             });
         }
-        const user = await User.findOne({email});
+
+        let user;
+
+        if (role === 'admin') {
+            user = await Admin.findOne({ email });
+        } else if (role === 'customer') {
+            user = await User.findOne({ email });
+        } else {
+            return res.status(400).json({
+                message: "Invalid role",
+                success: false
+            });
+        }
+
+        //const user = await User.findOne({email});
         if(!user){
             return res.status(401).json({
                 success: false,               
@@ -80,6 +95,7 @@ module.exports.Login = async(req, res) => {
                 
             });
         }
+
         const auth = await bcrypt.compare(password, user.password);
         if(!auth){
             return res.status(401).json({
@@ -88,16 +104,18 @@ module.exports.Login = async(req, res) => {
             });
         }
 
-        const token = createSecretToken(user._id);
+        const token = createSecretToken(user._id, user.role);
         res.cookie("token", token, {
             withCredentials: true,
             httpOnly: false
         });
+
         res.status(201).json({
             success: true,
-            message: "User logged in successfully",
+            message: `${role.charAt(0).toUpperCase() + role.slice(1)} logged in successfully}`,
             data: {
-                email: email,
+                email,
+                role,
                 token
             }
         });

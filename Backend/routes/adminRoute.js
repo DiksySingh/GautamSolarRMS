@@ -3,7 +3,8 @@ const { userVerification } = require("../middlewares/authMiddleware");
 const router = require("express").Router();
 
 router.post("/signup",adminSignUp);
-router.post("/login", adminLogin);
-router.post("/", userVerification);
+//router.post("/login", adminLogin);
+//router.post("/", userVerification);
+
 
 module.exports = router;

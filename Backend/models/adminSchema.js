@@ -26,6 +26,10 @@ const adminSchema = new Schema({
         required: true,
         minLength: [8, "Password should atleast contain 8 characters"]
     },
+    role: {
+        type: String,
+        default: 'admin',
+    },
     createdAt: {
         type: Date,
         default: getISTTime,

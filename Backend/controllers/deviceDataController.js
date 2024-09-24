@@ -1,18 +1,27 @@
 const DeviceData = require("../models/deviceDataSchema");
-const moment = require("moment")
+const moment = require('moment-timezone');
 
+
+//Fecthing all the device data through the IMEI NO
 module.exports.getInverterData = async(req, res)=> {
     try{
-        const {IMEI_NO} = req.params;
-        const data = await DeviceData.find({IMEI_NO});
-        if (data.length === 0) {
+        const IMEI_NO = req.params.IMEI_NO || req.body.IMEI_NO || req.query.IMEI_NO;
+        const deviceData = await DeviceData.find({IMEI_NO});
+        if (deviceData.length === 0) {
             return res.status(404).json({
                 message: "Data Not Found",
                 success: false
             });
         }
+        const convertedData = deviceData.map(item => {
+            const convertedDateTime = moment(item.DATE_TIME).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss'); 
+            return {
+                ...item.toObject(),
+                DATE_TIME: convertedDateTime // Override DATE_TIME with IST formatted date
+            };
+        });
         // Send the retrieved data
-        res.send(data);
+        res.json({data: convertedData});
     }catch(error){
         console.log("Error fetching data: ", error);
         res.status(500).json({
@@ -52,6 +61,8 @@ module.exports.getInverterData = async(req, res)=> {
 //     }
 // };
 
+
+//Saving data for the device into the database
 module.exports.addInverterData = async (req, res) => {
     try {
         const {qs} = req.query;
@@ -116,8 +127,17 @@ module.exports.addInverterData = async (req, res) => {
     }
 };
 
+
+//fetching device data according to the date filter option
 module.exports.fetchDeviceData = async(req, res) => {
-    const {IMEI_NO, filterOption, startDate, endDate} = req.body;
+    //console.log(req.params);
+   // console.log(req.body);
+    //console.log(req.query);
+    //const {IMEI_NO, filterOption, startDate, endDate} = req.body || req.query || req.params;
+    const data = req.query;
+    console.log(data);
+    const IMEI_NO = data.IMEI_NO;
+    const filterOption = data.filterOption;
     if(!IMEI_NO || !filterOption){
         return res.status(400).json({
             success: false,
@@ -199,9 +219,11 @@ module.exports.fetchDeviceData = async(req, res) => {
     }
 };
 
+
+//Fetching the overview of the device from the database
 module.exports.getDeviceOverview = async (req, res) => {
     try {
-        const { imei } = req.params;
+        const { imei } = req.query;
         const { month, year } = req.query;
 
         // Fetch the latest data

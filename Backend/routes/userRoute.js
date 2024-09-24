@@ -5,5 +5,6 @@ const router = require("express").Router();
 router.post("/signup", Signup);
 router.post("/login", Login);
 //router.post('/logout', Logout);
-router.post("/", userVerification);
+//router.post("/", userVerification);
+//userVerification(['admin', 'customer'])
 module.exports = router;
