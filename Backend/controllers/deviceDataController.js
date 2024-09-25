@@ -131,13 +131,15 @@ module.exports.addInverterData = async (req, res) => {
 //fetching device data according to the date filter option
 module.exports.fetchDeviceData = async(req, res) => {
     //console.log(req.params);
-   // console.log(req.body);
+    //console.log(req.body);
     //console.log(req.query);
     //const {IMEI_NO, filterOption, startDate, endDate} = req.body || req.query || req.params;
     const data = req.query;
     console.log(data);
     const IMEI_NO = data.IMEI_NO;
+    console.log(IMEI_NO);
     const filterOption = data.filterOption;
+    console.log(filterOption);
     if(!IMEI_NO || !filterOption){
         return res.status(400).json({
             success: false,
@@ -150,13 +152,13 @@ module.exports.fetchDeviceData = async(req, res) => {
     today.setHours(23, 59, 59, 999);
 
     switch(filterOption){
-        case "today":
+        case 'today':
             start = new Date();
             start.setHours(0, 0, 0, 0);
             end = today;
             break;
         
-        case "1 month":
+        case '1 month':
             start = new Date();
             start.setMonth(today.getMonth() - 1);
             start.setHours(0, 0, 0, 0);
@@ -198,7 +200,7 @@ module.exports.fetchDeviceData = async(req, res) => {
                 $lte: end
             }
         });
-        //console.log(fetchData);
+        console.log(fetchData);
         if(fetchData.length === 0){
             return res.status(404).json({
                 success: false,

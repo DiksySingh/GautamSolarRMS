@@ -16,7 +16,7 @@ module.exports.userVerification = (roles) => {
             }else{
                 // const user = await User.findById(data.id);
                 // if(user){
-                //     return res.json({
+                //     return res.json({ 
                 //         status: true,
                 //         user: user.username
                 //     })
