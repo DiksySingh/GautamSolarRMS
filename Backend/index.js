@@ -28,8 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //Routes
-app.use("/admin", adminRoute);
-app.use("/user", userRoute);
+app.use("/", userRoute);
 app.use("/device", deviceDataRoute);
 
 // app.get("/showData", async(req, res)=> {

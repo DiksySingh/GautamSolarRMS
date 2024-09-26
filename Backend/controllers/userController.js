@@ -3,8 +3,8 @@ const Admin = require("../models/adminSchema");
 const {createSecretToken} = require("../util/secretToken");
 const bcrypt = require("bcrypt");
 
-module.exports.Signup = async(req, res) => {
-        const {name, address, email, plantInstalled, password, role, createdAt} = req.body;
+module.exports.userSignup = async(req, res) => {
+        const {name, address, email, plantInstalled, imeiNo, password, role, createdAt} = req.body;
         if (!name) {
             return res.status(400).json({ 
                 message: "Name is required", 
@@ -25,6 +25,13 @@ module.exports.Signup = async(req, res) => {
                 success: false
             })
         }
+
+        if(!imeiNo){
+            return res.status(400).json({
+                message: "IMEI_NO is required",
+                success: false
+            })
+        }
     
         if (!password || password.length < 8) {
             return res.status(400).json({ 
@@ -40,7 +47,7 @@ module.exports.Signup = async(req, res) => {
                 message: "User already exist"
             });
         }
-        const newUser = new User({name, address, email, plantInstalled, password, role, createdAt});
+        const newUser = new User({name, address, email, plantInstalled, imeiNo, password, role, createdAt});
         console.log(newUser);
         await newUser.save();
 
@@ -110,7 +117,7 @@ module.exports.Login = async(req, res) => {
             httpOnly: false
         });
 
-        res.status(201).json({
+        res.status(200 ).json({
             success: true,
             message: `${role.charAt(0).toUpperCase() + role.slice(1)} logged in successfully}`,
             data: {
@@ -127,6 +134,7 @@ module.exports.Login = async(req, res) => {
         });
     }
 }
+
 
 // module.exports.Logout = async(req, res, next) => {
 //         res.clearCookie('token');

@@ -1,6 +1,8 @@
 const DeviceData = require("../models/deviceDataSchema");
 const moment = require('moment-timezone');
+const User = require("../models/userSchema");
 
+const OFFLINE_THRESHOLD = 10 * 60 * 1000; 
 
 //Fecthing all the device data through the IMEI NO
 module.exports.getInverterData = async(req, res)=> {
@@ -128,106 +130,15 @@ module.exports.addInverterData = async (req, res) => {
 };
 
 
-//fetching device data according to the date filter option
-module.exports.fetchDeviceData = async(req, res) => {
-    //console.log(req.params);
-    //console.log(req.body);
-    //console.log(req.query);
-    //const {IMEI_NO, filterOption, startDate, endDate} = req.body || req.query || req.params;
-    const data = req.query;
-    console.log(data);
-    const IMEI_NO = data.IMEI_NO;
-    console.log(IMEI_NO);
-    const filterOption = data.filterOption;
-    console.log(filterOption);
-    if(!IMEI_NO || !filterOption){
-        return res.status(400).json({
-            success: false,
-            message: "IMEI_NO and filterOption is required"
-        });
-    }
-    let start, end;
-
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-
-    switch(filterOption){
-        case 'today':
-            start = new Date();
-            start.setHours(0, 0, 0, 0);
-            end = today;
-            break;
-        
-        case '1 month':
-            start = new Date();
-            start.setMonth(today.getMonth() - 1);
-            start.setHours(0, 0, 0, 0);
-            end = today;
-            break;
-        
-        case '3 months':
-            start = new Date();
-            start.setMonth(today.getMonth() - 3);
-            start.setHours(0, 0, 0, 0);
-            end = today;
-            break;
-        
-        case 'custom':
-            if(!startDate || !endDate){
-                return res.status(400).json({
-                    success: false,
-                    message: "For custom filter, startDate and endDate are required.",
-                });
-            }
-
-            start = new Date(startDate);
-            end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-            break;
-        
-        default:
-            return res.status(400).json({
-                success: false,
-                message: "Invalid filter option.",
-            });
-    }
-
-    try{
-        const fetchData = await DeviceData.find({
-            IMEI_NO: IMEI_NO,
-            DATE_TIME: {
-                $gte: start,
-                $lte: end
-            }
-        });
-        console.log(fetchData);
-        if(fetchData.length === 0){
-            return res.status(404).json({
-                success: false,
-                message: "Data Not Found",
-            });
-        }
-        res.status(200).json({
-            success: true,
-            message: "Data Fetched Successfully",
-            data: fetchData
-        });
-    }catch(error){
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-            error: error.message
-        });
-    }
-};
-
-
 //Fetching the overview of the device from the database
 module.exports.getDeviceOverview = async (req, res) => {
     try {
-        const { imei } = req.query;
-        const { month, year } = req.query;
+        const imei = req.user.imeiNo;
+        
+        const month = req.query.month;
+        const year = req.query.year;
 
+        //Production Overview Code
         // Fetch the latest data
         const latestData = await DeviceData.findOne({ IMEI_NO: imei }).sort({ DATE_TIME: -1 }); // Get the latest record
         console.log(latestData);
@@ -248,6 +159,8 @@ module.exports.getDeviceOverview = async (req, res) => {
         console.log(yearlyProduction);
         const totalProduction = latestData.TOTAL_ENERGY;
 
+
+        //For Bar Chart 
         // Calculate the start and end of the requested month or default to current month/year
         const selectedMonth = month || moment().format('MM'); // Defaults to current month if not provided
         const selectedYear = year || moment().format('YYYY'); // Defaults to current year if not provided
@@ -261,7 +174,7 @@ module.exports.getDeviceOverview = async (req, res) => {
             { 
                 $match: { 
                     IMEI_NO: imei, 
-                    DATE_TIME: { $gte: startOfMonth, $lte: endOfMonth } 
+                    DATE_TIME: { $gte: startOfMonth, $lte: endOfMonth }                     
                 } 
             },
             {
@@ -279,15 +192,32 @@ module.exports.getDeviceOverview = async (req, res) => {
             totalEnergy: item.totalEnergy
         }));
 
+
+        //Plant Status Code
+        const currentTimeUTC = new Date();
+        const currentTimeIST = new Date(currentTimeUTC.getTime() + (5 * 60 + 30) *  60 * 1000);
+        console.log(currentTimeIST);
+        const lastUpdateTimeUTC = new Date(latestData.DATE_TIME);
+        const lastUpdateTimeIST = new Date(lastUpdateTimeUTC.getTime() + (5 * 60 + 30) * 60 * 1000);
+        console.log(lastUpdateTimeIST);
+        
+        const timeDifference = currentTimeIST - lastUpdateTimeIST;
+
+        const deviceStatus = timeDifference > OFFLINE_THRESHOLD ? "Offline" : "Online";
+
         res.status(200).json({
             success: true,
-            totalProductionPower,
-            installedCapacity,
-            dailyProduction,
-            monthlyProduction,
-            yearlyProduction,
-            totalProduction,
-            productionData
+            data:{
+                totalProductionPower,
+                installedCapacity,
+                dailyProduction,
+                monthlyProduction,
+                yearlyProduction,
+                totalProduction,
+                productionData,
+                status: deviceStatus,
+                lastUpdateTimeIST,
+            } 
         });
     } catch (err) {
         res.status(500).json({ 
@@ -337,3 +267,149 @@ async function getYearlyProduction(imei) {
         throw error;
     }
 }
+
+
+//Real Time Live Data of the Inverter
+module.exports.getRealTimeData = async (req, res) => {
+    const deviceIMEI = req.user.imeiNo;
+    console.log(deviceIMEI);
+    try{
+        // const existingUser = await User.findOne({userEmail});
+        // console.log(existingUser);
+        // if(!existingUser){
+        //     res.status(400).json({
+        //         message: "User Doesn't Exists",
+        //         success: false
+        //     });
+        // }
+        
+        // const deviceIMEI = existingUser.imeiNo;
+        // console.log(deviceIMEI);
+        const latestData = await DeviceData.findOne({IMEI_NO: deviceIMEI}).sort({DATE_TIME: -1});
+        console.log(latestData);
+        if(!latestData){
+            res.status(404).json({
+                message: "Data Not Found",
+                success: false
+            });
+        }
+
+        res.status(200).json({
+            message: "Data Fetched Successfully",
+            success: true,
+            data: latestData
+        });
+    }catch(error){
+        res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message
+        });
+    }
+}
+
+//fetching device data according to the date filter option
+module.exports.fetchDeviceData = async(req, res) => {
+    //console.log(req.params);
+    //console.log(req.body);
+    //console.log(req.query);
+    //const {IMEI_NO, filterOption, startDate, endDate} = req.body || req.query || req.params;
+    try{
+        // const userEmail = req.user.email;
+        // const userInfo = await User.findOne({email: userEmail});
+        // console.log(userInfo);
+        // if(!userInfo){
+        //     res.status(400).json({
+        //         message: "User Doedn't Exists",
+        //         success: false
+        //     })
+        // }
+
+        const IMEI_NO = req.user.imeiNo;
+        console.log(IMEI_NO);
+    
+        const data = req.query;
+        console.log(data);
+        // const IMEI_NO = data.IMEI_NO;
+        //console.log(IMEI_NO);
+        const filterOption = data.filterOption;
+        console.log(filterOption);
+        if(!IMEI_NO || !filterOption){
+            return res.status(400).json({
+                success: false,
+                message: "IMEI_NO and filterOption is required"
+            });
+        }
+        let start, end;
+
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+
+        switch(filterOption){
+            case 'today':
+                start = new Date();
+                start.setHours(0, 0, 0, 0);
+                end = today;
+                break;
+            
+            case '1 month':
+                start = new Date();
+                start.setMonth(today.getMonth() - 1);
+                start.setHours(0, 0, 0, 0);
+                end = today;
+                break;
+            
+            case '3 months':
+                start = new Date();
+                start.setMonth(today.getMonth() - 3);
+                start.setHours(0, 0, 0, 0);
+                end = today;
+                break;
+            
+            case 'custom':
+                if(!startDate || !endDate){
+                    return res.status(400).json({
+                        success: false,
+                        message: "For custom filter, startDate and endDate are required.",
+                    });
+                }
+
+                start = new Date(startDate);
+                end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                break;
+            
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid filter option.",
+                });
+        }
+
+        const fetchData = await DeviceData.find({
+            IMEI_NO: IMEI_NO,
+            DATE_TIME: {
+                $gte: start,
+                $lte: end
+            }
+        });
+        console.log(fetchData);
+        if(fetchData.length === 0){
+            return res.status(404).json({
+                success: false,
+                message: "Data Not Found",
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Data Fetched Successfully",
+            data: fetchData
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};

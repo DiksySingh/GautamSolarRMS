@@ -21,6 +21,18 @@ const userSchema = new Schema({
         type: Number,
         required: true,
     },
+    imeiNo: { 
+        type: String, 
+        required: true,
+        minlength: 15,
+        maxlength: 15,
+        validate: {
+            validator: function(v) {
+                return /^\d{15}$/.test(v); // Validate if IMEI is exactly 15 digits
+            },
+            message: props => `${props.value} is not a valid IMEI number!`
+        }
+    },
     password: {
         type: String,
         required: [true, "Password is required"],

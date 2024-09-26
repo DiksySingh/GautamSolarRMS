@@ -36,22 +36,29 @@ module.exports.userVerification = (roles) => {
                         console.log("Customer:",user)
                     }
 
-                    if (user) {
-                        return res.status(200).json({ 
-                            status: true, 
-                            user: user.username 
+                    if (!user) {
+                        return res.status(404).json({ 
+                            status: false, 
+                            message: "User Not Found" 
                         });
                     }
 
                     // Check if the user's role matches any of the allowed roles
                     if (roles.includes(user.role)) {
-                        req.user = user; // Attach user info to the request object
+                        req.user = user;
+                        console.log(req.user); // Attach user info to the request object
                         next(); // Proceed to the next middleware or route handler
                     } else {
-                        return res.status(403).json({ status: false, message: "Access denied" });
+                        return res.status(403).json({ 
+                            status: false, 
+                            message: "Access Denied" 
+                        });
                     }
                 } catch (error) {
-                    return res.status(500).json({ status: false, message: "Internal Server Error" });
+                    return res.status(500).json({ 
+                        status: false, 
+                        message: "Internal Server Error" 
+                    });
                 }
             }
         });
