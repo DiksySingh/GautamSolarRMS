@@ -8,5 +8,4 @@ router.get("/device-overview", userVerification(['customer']),  getDeviceOvervie
 router.get("/device-live-data", userVerification(['customer']), getRealTimeData);
 router.get("/device-history", userVerification(['customer']),  fetchDeviceData);
 
-
 module.exports = router;
