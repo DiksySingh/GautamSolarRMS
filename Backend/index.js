@@ -19,7 +19,10 @@ main()
   });
 
 async function main(){
-    await mongoose.connect(URL);
+    await mongoose.connect(URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 }
 
 app.use(cors()); 
