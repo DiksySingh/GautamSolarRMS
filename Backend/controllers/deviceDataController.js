@@ -7,7 +7,7 @@ const OFFLINE_THRESHOLD = 10 * 60 * 1000;
 //Fecthing all the device data through the IMEI NO
 module.exports.getInverterData = async(req, res)=> {
     try{
-        const IMEI_NO = req.params.IMEI_NO || req.body.IMEI_NO || req.query.IMEI_NO;
+        const IMEI_NO = req.query.IMEI_NO || req.params.IMEI_NO || req.body.IMEI_NO;
         const deviceData = await DeviceData.find({IMEI_NO});
         if (deviceData.length === 0) {
             return res.status(404).json({

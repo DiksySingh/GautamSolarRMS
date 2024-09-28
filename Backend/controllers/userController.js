@@ -119,12 +119,12 @@ module.exports.Login = async(req, res) => {
 
         res.status(200 ).json({
             success: true,
-            message: `${role.charAt(0).toUpperCase() + role.slice(1)} logged in successfully}`,
-            data: {
-                email,
-                role,
-                token
-            }
+            message: `${role.charAt(0).toUpperCase() + role.slice(1)} logged in successfully`,   
+            name: user.name,
+            address: user.address,
+            email: email,
+            role: role,
+            token
         });
     }catch(error){
         res.status(500).json({
