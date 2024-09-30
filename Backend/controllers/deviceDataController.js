@@ -4,7 +4,8 @@ const User = require("../models/userSchema");
 
 const OFFLINE_THRESHOLD = 10 * 60 * 1000; 
 
-//Fecthing all the device data through the IMEI NO
+//Admin access controllers
+//Fecthing all the device data through the IMEI NO (Admin)
 module.exports.getInverterData = async(req, res)=> {
     try{
         const IMEI_NO = req.query.IMEI_NO || req.params.IMEI_NO || req.body.IMEI_NO;
@@ -29,6 +30,23 @@ module.exports.getInverterData = async(req, res)=> {
         res.status(500).json({
             message: "Internal Server Error",
             success: false,
+            error: error.message
+        });
+    }
+};
+
+module.exports.getPlantOverview = async(req, res) => {
+    try{
+        const totalPlants = await User.countDocuments();
+        res.status(200).json({
+            success: true,
+            message: "Data fetched successfully",
+            totalPlants
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
             error: error.message
         });
     }
@@ -63,7 +81,7 @@ module.exports.getInverterData = async(req, res)=> {
 //     }
 // };
 
-
+//RMU Device Controller
 //Saving data for the device into the database
 module.exports.addInverterData = async (req, res) => {
     try {
@@ -130,6 +148,7 @@ module.exports.addInverterData = async (req, res) => {
 };
 
 
+//Customer Access Controller
 //Fetching the overview of the device from the database
 module.exports.getDeviceOverview = async (req, res) => {
     try {

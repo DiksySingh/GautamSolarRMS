@@ -1,5 +1,6 @@
 //const {createSecretToken} = require("../util/secretToken");
 const Admin = require("../models/adminSchema");
+const User = require("../models/userSchema");
 //const bcrypt = require("bcrypt");
 
 module.exports.adminSignUp = async (req, res) => {
@@ -92,3 +93,87 @@ module.exports.adminSignUp = async (req, res) => {
 //         });
 //     }
 // };
+
+//Update Customer Data
+module.exports.getCustomer = async(req, res) => {
+    try{
+        const allCustomer = await User.find({});
+        if(!allCustomer){
+            return res.status(400).json({
+                success: false,
+                message: "No Data Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Data Fetched Successfully",
+            allCustomer
+        }); 
+
+    }catch(error){
+        res.status(500).json({
+            success:false,
+            message: "Internal Server Error",
+            error: error.message
+        })
+    }
+
+};
+
+module.exports.updateCustomer = async(req, res) => {
+    try{
+        const customerID = req.query.id;
+        const updatedData = req.body;
+
+        const customer = await User.findByIdAndUpdate(customerID, {$set: updatedData}, {
+            new: true,
+            runValidators: true,
+        });
+
+        if(!customer){
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Customer updated successfully",
+            data: customer
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+}
+
+module.exports.deleteCustomer = async(req, res) => {
+    try{
+        const customerID = req.query.id;
+        const customer = await User.findByIdAndDelete(customerID)
+
+        if(!customer){
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Customer deleted successfully",
+            data: customer
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+}
